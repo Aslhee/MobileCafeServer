@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "381685775384",
+    "firebase_url": "https://mobilecafeserver-default-rtdb.firebaseio.com",
+    "project_id": "mobilecafeserver",
+    "storage_bucket": "mobilecafeserver.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381685775384:android:80e3d53a0a69d50094d76d",
+        "android_client_info": {
+          "package_name": "com.project.mobilecafeserver"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwwhRmIcEqDRA4NhCIpbC_dpwFTodIe7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

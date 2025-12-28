@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="20dp"
+    app:cardBackgroundColor="#C8E6C9"
+    app:cardElevation="8dp">
+    <!-- #C8E6C9 is that light green color from your image -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <!-- CLOSE BUTTON (X) -->
+        <ImageView
+            android:id="@+id/imgClose"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="#000000"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 15 MINUTES -->
+        <Button
+            android:id="@+id/btn15Min"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="15 Minutes"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/imgClose"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 30 MINUTES -->
+        <Button
+            android:id="@+id/btn30Min"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="30 Minutes"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="10dp"
+            app:layout_constraintTop_toBottomOf="@id/btn15Min"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 1 HOUR -->
+        <Button
+            android:id="@+id/btn1Hour"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="1 Hour"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="10dp"
+            app:layout_constraintTop_toBottomOf="@id/btn30Min"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 2 HOURS (To match your image) -->
+        <Button
+            android:id="@+id/btn2Hours"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="2 Hours"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="10dp"
+            app:layout_constraintTop_toBottomOf="@id/btn1Hour"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>
