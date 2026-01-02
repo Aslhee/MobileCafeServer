@@ -1,6 +1,7 @@
 package com.project.mobilecafeserver
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +16,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: DeviceAdapter
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private lateinit var cbToggleSelection: android.widget.CheckBox
+    private lateinit var btnDeleteSelected: android.widget.ImageView
 
     // Create the "Runnable" (The Task)
     private val refreshTask = object : Runnable {
@@ -56,6 +59,27 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
 
+        // --- BIND TOOLBAR VIEWS ---
+        cbToggleSelection = findViewById(R.id.cbToggleSelection)
+        btnDeleteSelected = findViewById(R.id.btnDeleteSelected)
+
+        // --- LOGIC: TOGGLE SELECTION MODE ---
+        cbToggleSelection.setOnCheckedChangeListener { _, isChecked ->
+            // 1. Tell Adapter to switch modes
+            adapter.isSelectionMode = isChecked
+
+            // 2. Show/Hide Delete Button
+            btnDeleteSelected.visibility = if (isChecked) View.VISIBLE else View.GONE
+
+            // 3. Refresh list to show/hide checkboxes
+            adapter.notifyDataSetChanged()
+        }
+
+        // --- LOGIC: DELETE BUTTON ---
+        btnDeleteSelected.setOnClickListener {
+            deleteSelectedDevices()
+        }
+
         deviceList = arrayListOf()
 
         // 3. Connect the Adapter
@@ -82,28 +106,31 @@ class MainActivity : AppCompatActivity() {
         val currentTime = System.currentTimeMillis()
 
         if (device.status == "ACTIVE") {
-            // --- LOGIC: PAUSE THE DEVICE ---
-            // 1. Calculate how much time is left right now
+            // --- PAUSE LOGIC ---
             val timeLeft = device.endTime - currentTime
 
             if (timeLeft > 0) {
                 val updates = mapOf(
                     "status" to "PAUSED",
-                    "savedTime" to timeLeft, // Save the remaining time
-                    "endTime" to 0 // Stop the clock
+                    "savedTime" to timeLeft, // Save the time
+                    "endTime" to 0
                 )
                 dbRef.child(device.deviceId).updateChildren(updates)
-                Toast.makeText(this, "Paused ${device.name}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Paused", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Time already expired", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Time expired", Toast.LENGTH_SHORT).show()
             }
 
         } else if (device.status == "PAUSED") {
-            // --- LOGIC: RESUME THE DEVICE ---
-            // 1. Get the time we saved earlier
-            val timeToRestore = device.savedTime
+            // --- RESUME LOGIC ---
+            var timeToRestore = device.savedTime
 
-            // 2. Add it to the CURRENT time to get a NEW end time
+            //  SAFETY FIX: If savedTime is 0 (bug), give 1 minute so it doesn't lock instantly
+            if (timeToRestore <= 0) {
+                timeToRestore = 60000L // 1 Minute default
+            }
+
+            // Calculate new End Time
             val newEndTime = currentTime + timeToRestore
 
             val updates = mapOf(
@@ -112,8 +139,35 @@ class MainActivity : AppCompatActivity() {
                 "savedTime" to 0
             )
             dbRef.child(device.deviceId).updateChildren(updates)
-            Toast.makeText(this, "Resumed ${device.name}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Resumed", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun deleteSelectedDevices() {
+        val itemsToDelete = deviceList.filter { it.isSelected }
+
+        if (itemsToDelete.isEmpty()) {
+            Toast.makeText(this, "No devices selected", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Delete Devices?")
+            .setMessage("Are you sure you want to remove ${itemsToDelete.size} devices?")
+            .setPositiveButton("DELETE") { _, _ ->
+
+                // Delete from Firebase
+                for (device in itemsToDelete) {
+                    dbRef.child(device.deviceId).removeValue()
+                }
+
+                Toast.makeText(this, "Deleted ${itemsToDelete.size} devices", Toast.LENGTH_SHORT).show()
+
+                // Reset Selection Mode
+                cbToggleSelection.isChecked = false
+            }
+            .setNegativeButton("CANCEL", null)
+            .show()
     }
 
     // --- NEW FUNCTION: Show the Dialog ---
@@ -145,7 +199,7 @@ class MainActivity : AppCompatActivity() {
 
         // Time Logic
         btn15.setOnClickListener {
-            addTime(device, 15) // Add 15 mins
+            addTime(device, 1) // Add 15 mins
             dialog.dismiss()
         }
         btn30.setOnClickListener {
@@ -166,26 +220,21 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun getDevicesData() {
-        // This function runs every time something changes in Firebase
         dbRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                deviceList.clear() // Clear old list
+                deviceList.clear() // 1. Wipe the old list
                 if (snapshot.exists()) {
-                    // Loop through all devices in database
                     for (deviceSnap in snapshot.children) {
                         val device = deviceSnap.getValue(DeviceModel::class.java)
                         if (device != null) {
-                            deviceList.add(device)
+                            deviceList.add(device) // 2. Add the updated data (Status: PAUSED)
                         }
                     }
-                    // Tell the list to refresh
+                    // 3. FORCE THE ADAPTER TO REDRAW
                     adapter.notifyDataSetChanged()
                 }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(this@MainActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
-            }
+            override fun onCancelled(error: DatabaseError) {}
         })
     }
 

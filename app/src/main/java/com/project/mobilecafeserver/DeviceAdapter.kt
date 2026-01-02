@@ -5,8 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.util.Locale
 
 class DeviceAdapter(
     private val deviceList: ArrayList<DeviceModel>,
@@ -15,6 +17,9 @@ class DeviceAdapter(
     private val onPause: (DeviceModel) -> Unit // <--- Add this new action
 ) : RecyclerView.Adapter<DeviceAdapter.DeviceViewHolder>() {
 
+    // VARIABLE TO TRACK MODE
+    var isSelectionMode = false
+
     // This class holds the UI elements from item_device.xml
     class DeviceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tvDeviceName)
@@ -22,6 +27,9 @@ class DeviceAdapter(
         val btnAdd: Button = itemView.findViewById(R.id.btnAddTime)
         val btnLock: Button = itemView.findViewById(R.id.btnLock)
         val btnPause: Button = itemView.findViewById(R.id.btnPause) // <--- Bind it
+
+        // NEW CHECKBOX
+        val cbSelect: CheckBox = itemView.findViewById(R.id.cbSelect)
     }
 
     // 1. Create the view (inflate the XML)
@@ -34,35 +42,68 @@ class DeviceAdapter(
     override fun onBindViewHolder(holder: DeviceViewHolder, position: Int) {
         val device = deviceList[position]
 
-        // Set Name
+        // 1. Set Name
         holder.tvName.text = device.name
 
-        // Set Status and Logic
-        if (device.status == "ACTIVE") {
-            // Calculate remaining time for display
-            val remainingMillis = device.endTime - System.currentTimeMillis()
-            if (remainingMillis > 0) {
-// NEW CODE (Shows 54:30):
-                val minutes = (remainingMillis / 1000) / 60
-                val seconds = (remainingMillis / 1000) % 60
-                val timeString = String.format("%02d:%02d", minutes, seconds)
-                holder.tvStatus.text = "Status: ACTIVE ($timeString left)"
-                holder.tvStatus.setTextColor(Color.parseColor("#4CAF50")) // Green
-            } else {
-                holder.tvStatus.text = "Status: EXPIRED (Waiting for Lock)"
-                holder.tvStatus.setTextColor(Color.RED)
+        // 2. Status Logic (Colors & Text)
+        val currentTime = System.currentTimeMillis()
+
+        when (device.status) {
+            "ACTIVE" -> {
+                val remainingMillis = device.endTime - currentTime
+                if (remainingMillis > 0) {
+                    val minutes = (remainingMillis / 1000) / 60
+                    val seconds = (remainingMillis / 1000) % 60
+                    val timeString = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+
+                    holder.tvStatus.text = "Status: ACTIVE ($timeString left)"
+                    holder.tvStatus.setTextColor(Color.parseColor("#4CAF50")) // Green
+                } else {
+                    holder.tvStatus.text = "Status: EXPIRED (Waiting for Lock)"
+                    holder.tvStatus.setTextColor(Color.RED)
+                }
+                holder.btnPause.text = "Pause"
+                holder.btnPause.isEnabled = true
             }
-        } else {
-            holder.tvStatus.text = "Status: LOCKED"
-            holder.tvStatus.setTextColor(Color.RED)
+            "PAUSED" -> {
+                val savedMillis = device.savedTime
+                val minutes = (savedMillis / 1000) / 60
+                val seconds = (savedMillis / 1000) % 60
+                val timeString = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+
+                holder.tvStatus.text = "Status: PAUSED ($timeString frozen)"
+                holder.tvStatus.setTextColor(Color.parseColor("#FF9800")) // Orange
+                holder.btnPause.text = "Resume"
+                holder.btnPause.isEnabled = true
+            }
+            else -> { // LOCKED
+                holder.tvStatus.text = "Status: LOCKED"
+                holder.tvStatus.setTextColor(Color.RED)
+                holder.btnPause.text = "Pause"
+                holder.btnPause.isEnabled = false
+            }
         }
 
-        // Button Click Listeners (Pass the action back to MainActivity)
+        // 3. Selection Mode Logic (The Checkbox)
+        if (isSelectionMode) {
+            holder.cbSelect.visibility = View.VISIBLE
+        } else {
+            holder.cbSelect.visibility = View.GONE
+            device.isSelected = false // Reset if mode is off
+        }
+
+        // Prevent weird checkbox behavior when scrolling
+        holder.cbSelect.setOnCheckedChangeListener(null)
+        holder.cbSelect.isChecked = device.isSelected
+        holder.cbSelect.setOnCheckedChangeListener { _, isChecked ->
+            device.isSelected = isChecked
+        }
+
+        // 4. BUTTON CLICK LISTENERS (This is likely what was missing!)
         holder.btnAdd.setOnClickListener { onAddTime(device) }
         holder.btnLock.setOnClickListener { onLock(device) }
-        holder.btnPause.setOnClickListener { onPause(device) } // <--- Click
+        holder.btnPause.setOnClickListener { onPause(device) }
     }
 
-    // 3. How many items are there?
     override fun getItemCount(): Int = deviceList.size
 }
