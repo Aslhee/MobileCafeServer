@@ -252,28 +252,60 @@ class MainActivity : AppCompatActivity() {
 
     // --- UPDATED LOGIC: Accepts 'minutes' as parameter ---
     private fun addTime(device: DeviceModel, minutesToAdd: Int) {
-        val currentTime = System.currentTimeMillis()
         val timeToAddMillis = minutesToAdd * 60 * 1000L
+        val currentTime = System.currentTimeMillis()
 
-        // 1. Logic for Device Timer (Existing)
-        val newEndTime = if (device.status == "ACTIVE" && device.endTime > currentTime) {
-            device.endTime + timeToAddMillis
-        } else {
-            currentTime + timeToAddMillis
-        }
+        // 1. GET LATEST DATA FROM FIREBASE (The Source of Truth)
+        dbRef.child(device.deviceId).get().addOnSuccessListener { snapshot ->
+            if (snapshot.exists()) {
+                // Get the real current values from DB
+                val currentStatus = snapshot.child("status").getValue(String::class.java) ?: "LOCKED"
+                val currentEndTime = snapshot.child("endTime").getValue(Long::class.java) ?: 0L
+                val currentSavedTime = snapshot.child("savedTime").getValue(Long::class.java) ?: 0L
 
-        val updates = mapOf(
-            "status" to "ACTIVE",
-            "endTime" to newEndTime
-        )
+                var newEndTime: Long = 0
+                var newSavedTime: Long = 0
+                var newStatus = "ACTIVE"
 
-        dbRef.child(device.deviceId).updateChildren(updates)
-            .addOnSuccessListener {
-                Toast.makeText(this, "Added $minutesToAdd mins", Toast.LENGTH_SHORT).show()
+                // 2. DETERMINE LOGIC BASED ON STATUS
+                if (currentStatus == "ACTIVE" && currentEndTime > currentTime) {
+                    // SCENARIO A: Device is running -> EXTEND the time
+                    newEndTime = currentEndTime + timeToAddMillis
+                    newStatus = "ACTIVE"
+                    // Keep savedTime as 0
+                }
+                else if (currentStatus == "PAUSED") {
+                    // SCENARIO B: Device is Paused -> Add to the "Frozen" time
+                    // We don't unlock it yet, we just give them more credit.
+                    newSavedTime = currentSavedTime + timeToAddMillis
+                    newStatus = "PAUSED"
+                    // endTime stays 0
+                }
+                else {
+                    // SCENARIO C: Device is Locked or Expired -> Start FRESH
+                    newEndTime = currentTime + timeToAddMillis
+                    newStatus = "ACTIVE"
+                }
 
-                // 2. NEW: Save to History Record!
-                saveHistoryRecord(device, minutesToAdd)
+                // 3. PREPARE UPDATES
+                val updates = mapOf(
+                    "status" to newStatus,
+                    "endTime" to newEndTime,
+                    "savedTime" to newSavedTime
+                )
+
+                // 4. WRITE TO DB
+                dbRef.child(device.deviceId).updateChildren(updates)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Added $minutesToAdd mins", Toast.LENGTH_SHORT).show()
+
+                        // Only save history if we actually added time
+                        saveHistoryRecord(device, minutesToAdd)
+                    }
             }
+        }.addOnFailureListener {
+            Toast.makeText(this, "Failed to connect to DB", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun saveHistoryRecord(device: DeviceModel, minutes: Int) {
