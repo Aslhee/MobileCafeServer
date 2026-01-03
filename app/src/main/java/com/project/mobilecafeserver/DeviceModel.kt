@@ -12,6 +12,7 @@ data class DeviceModel(
     var status: String = "LOCKED",   // Current State: "LOCKED" or "ACTIVE"
     var endTime: Long = 0,            // Timestamp when time expires (in milliseconds)
     var savedTime: Long = 0,// <--- ADD THIS NEW FIELD (Time remaining in ms)
+    var batteryLevel: Int = 0, // <--- ADD THIS NEW FIELD (Default 0)
 
     // This exists only in the app memory, NOT in Firebase
     @get:Exclude

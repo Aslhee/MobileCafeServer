@@ -27,6 +27,7 @@ class DeviceAdapter(
         val btnAdd: Button = itemView.findViewById(R.id.btnAddTime)
         val btnLock: Button = itemView.findViewById(R.id.btnLock)
         val btnPause: Button = itemView.findViewById(R.id.btnPause) // <--- Bind it
+        val tvBattery: TextView = itemView.findViewById(R.id.tvBattery)
 
         // NEW CHECKBOX
         val cbSelect: CheckBox = itemView.findViewById(R.id.cbSelect)
@@ -39,13 +40,24 @@ class DeviceAdapter(
     }
 
     // 2. Bind the data to the view (This runs for every row)
+    // --- FULL LOGIC HERE ---
     override fun onBindViewHolder(holder: DeviceViewHolder, position: Int) {
         val device = deviceList[position]
 
         // 1. Set Name
         holder.tvName.text = device.name
 
-        // 2. Status Logic (Colors & Text)
+        // 2. [NEW] Battery Logic
+        holder.tvBattery.text = "${device.batteryLevel}%"
+
+        // Change color based on percentage
+        if (device.batteryLevel > 20) {
+            holder.tvBattery.setTextColor(Color.parseColor("#388E3C")) // Green
+        } else {
+            holder.tvBattery.setTextColor(Color.RED) // Red Warning (< 20%)
+        }
+
+        // 3. Status Logic (Colors & Text)
         val currentTime = System.currentTimeMillis()
 
         when (device.status) {
@@ -84,7 +96,7 @@ class DeviceAdapter(
             }
         }
 
-        // 3. Selection Mode Logic (The Checkbox)
+        // 4. Selection Mode Logic (The Checkbox)
         if (isSelectionMode) {
             holder.cbSelect.visibility = View.VISIBLE
         } else {
@@ -99,7 +111,7 @@ class DeviceAdapter(
             device.isSelected = isChecked
         }
 
-        // 4. BUTTON CLICK LISTENERS (This is likely what was missing!)
+        // 5. Button Click Listeners
         holder.btnAdd.setOnClickListener { onAddTime(device) }
         holder.btnLock.setOnClickListener { onLock(device) }
         holder.btnPause.setOnClickListener { onPause(device) }
