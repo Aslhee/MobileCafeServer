@@ -63,6 +63,16 @@ class MainActivity : AppCompatActivity() {
         cbToggleSelection = findViewById(R.id.cbToggleSelection)
         btnDeleteSelected = findViewById(R.id.btnDeleteSelected)
 
+        // [NEW] Bind the Menu Button
+        val btnMenu = findViewById<android.widget.ImageView>(R.id.btnMenu)
+
+        // --- LOGIC: MENU BUTTON (History) ---
+        // [NEW] Click listener to open History Page
+        btnMenu.setOnClickListener {
+            val intent = android.content.Intent(this, HistoryActivity::class.java)
+            startActivity(intent)
+        }
+
         // --- LOGIC: TOGGLE SELECTION MODE ---
         cbToggleSelection.setOnCheckedChangeListener { _, isChecked ->
             // 1. Tell Adapter to switch modes
@@ -243,11 +253,9 @@ class MainActivity : AppCompatActivity() {
     // --- UPDATED LOGIC: Accepts 'minutes' as parameter ---
     private fun addTime(device: DeviceModel, minutesToAdd: Int) {
         val currentTime = System.currentTimeMillis()
-
-        // Calculate milliseconds based on the button clicked
         val timeToAddMillis = minutesToAdd * 60 * 1000L
 
-        // Logic: Add to existing time OR start fresh
+        // 1. Logic for Device Timer (Existing)
         val newEndTime = if (device.status == "ACTIVE" && device.endTime > currentTime) {
             device.endTime + timeToAddMillis
         } else {
@@ -261,8 +269,44 @@ class MainActivity : AppCompatActivity() {
 
         dbRef.child(device.deviceId).updateChildren(updates)
             .addOnSuccessListener {
-                Toast.makeText(this, "Added $minutesToAdd mins to ${device.name}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Added $minutesToAdd mins", Toast.LENGTH_SHORT).show()
+
+                // 2. NEW: Save to History Record!
+                saveHistoryRecord(device, minutesToAdd)
             }
+    }
+
+    private fun saveHistoryRecord(device: DeviceModel, minutes: Int) {
+        // Create a readable date
+        val sdf = java.text.SimpleDateFormat("MMM dd, hh:mm a", java.util.Locale.getDefault())
+        val dateString = sdf.format(java.util.Date())
+
+        // Create the record object
+        val record = HistoryModel(
+            mobileId = device.name,       // Or device.deviceId if you prefer
+            timeDuration = "$minutes Mins",
+            amount = calculatePrice(minutes),
+            timestamp = dateString,
+            hasFaceData = false, // Placeholder
+            hasLocationData = false // Placeholder
+        )
+
+        // Save to a NEW node called "history"
+        // dbRef points to "devices", so we go .parent to go back to root, then "history"
+        dbRef.parent?.child("history")?.push()?.setValue(record)
+    }
+
+    private fun calculatePrice(minutes: Int): String {
+        // DEFINE YOUR PRICING HERE
+        // Example: 15 pesos per hour (Change logic as needed)
+        val price = when (minutes) {
+            15 -> 5.00
+            30 -> 10.00
+            60 -> 20.00
+            120 -> 40.00
+            else -> 0.00
+        }
+        return "P $price"
     }
 
 

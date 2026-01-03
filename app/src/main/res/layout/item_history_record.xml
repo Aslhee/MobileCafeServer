@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical"
+    android:background="?attr/selectableItemBackground"> <!-- Adds click ripple -->
+
+    <!-- COLUMN 1: MID -->
+    <TextView
+        android:id="@+id/tvMid"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.5"
+        android:text="Oppo_PC1"
+        android:textStyle="bold"
+        android:textColor="#000000"/>
+
+    <!-- COLUMN 2: TIME -->
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="1 Hr"
+        android:gravity="center"/>
+
+    <!-- COLUMN 3: AMOUNT -->
+    <TextView
+        android:id="@+id/tvAmount"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="P 20.00"
+        android:textColor="#388E3C"
+        android:textStyle="bold"
+        android:gravity="end"/>
+
+    <!-- COLUMN 4: FACE ICON -->
+    <ImageView
+        android:id="@+id/ivFace"
+        android:layout_width="0dp"
+        android:layout_height="24dp"
+        android:layout_weight="0.8"
+        android:src="@android:drawable/ic_menu_camera"
+        android:contentDescription="Face Record"/>
+
+    <!-- COLUMN 5: LOCATION ICON -->
+    <ImageView
+        android:id="@+id/ivLocation"
+        android:layout_width="0dp"
+        android:layout_height="24dp"
+        android:layout_weight="0.8"
+        android:src="@android:drawable/ic_menu_mapmode"
+        android:contentDescription="Location Record"/>
+
+</LinearLayout>

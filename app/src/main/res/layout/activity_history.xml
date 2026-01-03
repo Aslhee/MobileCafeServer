@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- TITLE BAR -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="History Records"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:padding="20dp"
+        android:background="#FFFFFF"
+        android:textColor="#333333"/>
+
+    <!-- TABLE HEADER ROW -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="#E0E0E0">
+
+        <!-- COLUMN 1 -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:text="MOBILE ID"
+            android:textStyle="bold"/>
+
+        <!-- COLUMN 2 -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TIME"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
+        <!-- COLUMN 3 -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="AMOUNT"
+            android:textStyle="bold"
+            android:gravity="end"/>
+
+        <!-- COLUMN 4 -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:text="FACE"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
+        <!-- COLUMN 5 -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:text="LOC"
+            android:textStyle="bold"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <!-- LIST OF RECORDS -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerHistory"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>
