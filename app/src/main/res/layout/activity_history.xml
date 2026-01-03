@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="#EAEAEA">
 
     <!-- TITLE BAR -->
     <TextView
@@ -13,8 +13,20 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:padding="20dp"
-        android:background="#FFFFFF"
+        android:background="#eaeaea"
         android:textColor="#333333"/>
+
+    <!-- [NEW] DATE LABEL -->
+    <TextView
+        android:id="@+id/tvCurrentDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Date: Jan 03, 2026"
+        android:textSize="14sp"
+        android:paddingStart="20dp"
+        android:paddingBottom="10dp"
+        android:background="#eaeaea"
+        android:textColor="#757575"/>
 
     <!-- TABLE HEADER ROW -->
     <LinearLayout
@@ -22,7 +34,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="12dp"
-        android:background="#E0E0E0">
+        android:background="#F44336">
 
         <!-- COLUMN 1 -->
         <TextView
@@ -30,6 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1.5"
             android:text="MOBILE ID"
+            android:textColor="@color/black"
             android:textStyle="bold"/>
 
         <!-- COLUMN 2 -->
@@ -39,6 +52,7 @@
             android:layout_weight="1"
             android:text="TIME"
             android:textStyle="bold"
+            android:textColor="@color/black"
             android:gravity="center"/>
 
         <!-- COLUMN 3 -->
@@ -47,6 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="AMOUNT"
+            android:textColor="@color/black"
             android:textStyle="bold"
             android:gravity="end"/>
 
@@ -56,6 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.8"
             android:text="FACE"
+            android:textColor="@color/black"
             android:textStyle="bold"
             android:gravity="center"/>
 
@@ -65,14 +81,44 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.8"
             android:text="LOC"
+            android:textColor="@color/black"
             android:textStyle="bold"
             android:gravity="center"/>
     </LinearLayout>
 
-    <!-- LIST OF RECORDS -->
+    <!-- LIST OF RECORDS (Weight=1 pushes footer down) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerHistory"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <!-- [NEW] TOTAL FOOTER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="20dp"
+        android:background="#FFFFFF"
+        android:elevation="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TOTAL TODAY:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#333333"/>
+
+        <TextView
+            android:id="@+id/tvTotalAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="P 0.00"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#388E3C"
+            android:gravity="end"/>
+    </LinearLayout>
 
 </LinearLayout>
