@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- 1. HEADER TITLE -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Manage Allowed Apps"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:padding="20dp"
+        android:background="#FFFFFF"
+        android:textColor="#333333"
+        android:elevation="4dp"/>
+
+    <!-- 2. THE LIST OF APPS -->
+    <!-- layout_weight="1" pushes the button down to the bottom -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerApps"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:clipToPadding="false"/>
+
+    <!-- 3. SAVE BUTTON CONTAINER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="#FFFFFF"
+        android:elevation="8dp">
+
+        <Button
+            android:id="@+id/btnSaveApps"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="SAVE CHANGES"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="#006064"
+            android:textColor="#FFFFFF"/>
+    </LinearLayout>
+
+</LinearLayout>

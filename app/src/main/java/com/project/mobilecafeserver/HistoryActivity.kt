@@ -10,6 +10,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.project.mobilecafeserver.adapters.HistoryAdapter
+import com.project.mobilecafeserver.models.HistoryModel
 
 class HistoryActivity : AppCompatActivity() {
 

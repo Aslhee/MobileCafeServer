@@ -1,4 +1,4 @@
-package com.project.mobilecafeserver
+package com.project.mobilecafeserver.adapters
 
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.project.mobilecafeserver.R
+import com.project.mobilecafeserver.models.HistoryModel
 
 class HistoryAdapter(private val historyList: List<HistoryModel>) :
     RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {

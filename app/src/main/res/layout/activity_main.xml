@@ -34,6 +34,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- 3. [NEW] MANAGE APPS BUTTON (Edit Icon) -->
+        <!-- Placed to the LEFT of the Delete Button -->
+        <ImageView
+            android:id="@+id/btnManageApps"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@android:drawable/ic_menu_manage"
+            app:tint="#000000"
+            android:layout_marginEnd="16dp"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="Manage Apps"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnDeleteSelected"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <!-- 2. Delete Button -->
         <ImageView
             android:id="@+id/btnDeleteSelected"
@@ -46,7 +63,7 @@
             android:clickable="true"
             android:focusable="true"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnMenu"
+            app:layout_constraintEnd_toStartOf="@+id/btnMenu"
             app:layout_constraintTop_toTopOf="parent" />
 
         <!-- 3. Menu Dots -->

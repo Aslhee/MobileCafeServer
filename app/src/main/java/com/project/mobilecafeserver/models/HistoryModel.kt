@@ -1,4 +1,4 @@
-package com.project.mobilecafeserver
+package com.project.mobilecafeserver.models
 
 data class HistoryModel(
     val mobileId: String = "",

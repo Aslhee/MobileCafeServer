@@ -1,4 +1,4 @@
-package com.project.mobilecafeserver
+package com.project.mobilecafeserver.adapters
 
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -8,6 +8,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.project.mobilecafeserver.R
+import com.project.mobilecafeserver.models.DeviceModel
 import java.util.Locale
 
 class DeviceAdapter(

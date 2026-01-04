@@ -33,6 +33,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".HistoryActivity" />
+        <activity android:name=".ManageAppsActivity" />
+
     </application>
 
 </manifest>

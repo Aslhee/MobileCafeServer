@@ -7,6 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.*
+import com.project.mobilecafeserver.adapters.DeviceAdapter
+import com.project.mobilecafeserver.models.DeviceModel
+import com.project.mobilecafeserver.models.HistoryModel
 
 class MainActivity : AppCompatActivity() {
 
@@ -51,64 +54,73 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // 1. Setup Firebase
-        // We look for a folder named "devices" in your database
         dbRef = FirebaseDatabase.getInstance().getReference("devices")
 
-        // 2. Setup the RecyclerView (The UI List)
+        // 2. Setup RecyclerView
         recyclerView = findViewById(R.id.recyclerViewDevices)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.setHasFixedSize(true)
 
-        // --- BIND TOOLBAR VIEWS ---
+        // 3. Initialize List & Adapter FIRST (Before setting listeners)
+        deviceList = arrayListOf()
+        adapter = DeviceAdapter(deviceList,
+            onAddTime = { device -> showTimeDialog(device) },
+            onLock = { device -> lockDevice(device) },
+            onPause = { device -> togglePause(device) }
+        )
+        recyclerView.adapter = adapter
+
+        // 4. Bind Toolbar Views
         cbToggleSelection = findViewById(R.id.cbToggleSelection)
         btnDeleteSelected = findViewById(R.id.btnDeleteSelected)
-
-        // [NEW] Bind the Menu Button
         val btnMenu = findViewById<android.widget.ImageView>(R.id.btnMenu)
+        val btnManageApps = findViewById<android.widget.ImageView>(R.id.btnManageApps)
 
-        // --- LOGIC: MENU BUTTON (History) ---
-        // [NEW] Click listener to open History Page
+        // 5. Logic: Selection Toggle
+        cbToggleSelection.setOnCheckedChangeListener { _, isChecked ->
+            // Tell Adapter to switch modes
+            adapter.isSelectionMode = isChecked
+
+            // Show/Hide BOTH Action Buttons
+            if (isChecked) {
+                btnDeleteSelected.visibility = View.VISIBLE
+                btnManageApps.visibility = View.VISIBLE
+            } else {
+                btnDeleteSelected.visibility = View.GONE
+                btnManageApps.visibility = View.GONE
+            }
+
+            // Refresh list to show/hide checkboxes
+            adapter.notifyDataSetChanged()
+        }
+
+        // 6. Logic: Manage Apps (Edit Button)
+        btnManageApps.setOnClickListener {
+            val selectedItems = deviceList.filter { it.isSelected }
+
+            if (selectedItems.size == 1) {
+                val device = selectedItems[0]
+                val intent = android.content.Intent(this, ManageAppsActivity::class.java)
+                intent.putExtra("DEVICE_ID", device.deviceId)
+                startActivity(intent)
+            } else {
+                android.widget.Toast.makeText(this, "Please select EXACTLY ONE device to manage apps.", android.widget.Toast.LENGTH_LONG).show()
+            }
+        }
+
+        // 7. Logic: Delete Button
+        btnDeleteSelected.setOnClickListener {
+            deleteSelectedDevices()
+        }
+
+        // 8. Logic: History Menu
         btnMenu.setOnClickListener {
             val intent = android.content.Intent(this, HistoryActivity::class.java)
             startActivity(intent)
         }
 
-        // --- LOGIC: TOGGLE SELECTION MODE ---
-        cbToggleSelection.setOnCheckedChangeListener { _, isChecked ->
-            // 1. Tell Adapter to switch modes
-            adapter.isSelectionMode = isChecked
-
-            // 2. Show/Hide Delete Button
-            btnDeleteSelected.visibility = if (isChecked) View.VISIBLE else View.GONE
-
-            // 3. Refresh list to show/hide checkboxes
-            adapter.notifyDataSetChanged()
-        }
-
-        // --- LOGIC: DELETE BUTTON ---
-        btnDeleteSelected.setOnClickListener {
-            deleteSelectedDevices()
-        }
-
-        deviceList = arrayListOf()
-
-        // 3. Connect the Adapter
-        // We pass two functions (lambdas) here: one for adding time, one for locking
-        adapter = DeviceAdapter(deviceList,
-            onAddTime = { device ->
-                // Instead of adding time directly, SHOW THE DIALOG
-                showTimeDialog(device)
-            },
-            onLock = { device -> lockDevice(device) },
-            onPause = { device -> togglePause(device) } // <--- New Link
-
-        )
-        recyclerView.adapter = adapter
-
-        // 4. Start Listening for Data Changes
+        // 9. Start Data Sync
         getDevicesData()
-
-        // 5. Create a fake device so you have something to test immediately
         createDummyDevice()
     }
 
