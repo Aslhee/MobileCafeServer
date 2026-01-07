@@ -35,7 +35,10 @@ class HistoryActivity : AppCompatActivity() {
         (recyclerView.layoutManager as LinearLayoutManager).stackFromEnd = true
 
         historyList = arrayListOf()
-        adapter = HistoryAdapter(historyList)
+// Update Adapter Initialization
+        adapter = HistoryAdapter(historyList) { historyId ->
+            showFaceImage(historyId)
+        }
         recyclerView.adapter = adapter
 
         // 2. Get TODAY'S DATE
@@ -66,6 +69,7 @@ class HistoryActivity : AppCompatActivity() {
                         val record = recordSnap.getValue(HistoryModel::class.java)
 
                         if (record != null) {
+                            record.id = recordSnap.key ?: "" // <--- SAVE THE ID HERE
                             // Filter by Today's Date
                             if (record.timestamp.contains(filterString)) {
                                 historyList.add(record)
@@ -97,5 +101,32 @@ class HistoryActivity : AppCompatActivity() {
                 Toast.makeText(this@HistoryActivity, "Error: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+    private fun showFaceImage(historyId: String) {
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+        dialog.setTitle("Loading Image...")
+
+        // Fetch the Base64 string from Firebase
+        dbRef.child(historyId).child("faceImage").get().addOnSuccessListener { snapshot ->
+            val base64String = snapshot.getValue(String::class.java)
+
+            if (!base64String.isNullOrEmpty()) {
+                // Convert Base64 -> Bitmap
+                val decodedBytes = android.util.Base64.decode(base64String, android.util.Base64.DEFAULT)
+                val bitmap = android.graphics.BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+
+                // Show in ImageView
+                val imageView = android.widget.ImageView(this)
+                imageView.setImageBitmap(bitmap)
+                imageView.adjustViewBounds = true
+
+                dialog.setTitle("Security Capture")
+                dialog.setView(imageView)
+                dialog.setPositiveButton("CLOSE", null)
+                dialog.show()
+            } else {
+                Toast.makeText(this, "Image not found", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

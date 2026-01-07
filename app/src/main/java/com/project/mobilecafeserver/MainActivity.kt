@@ -261,83 +261,67 @@ class MainActivity : AppCompatActivity() {
     }
 
     // --- BUTTON LOGIC ---
-
-    // --- UPDATED LOGIC: Accepts 'minutes' as parameter ---
     private fun addTime(device: DeviceModel, minutesToAdd: Int) {
         val timeToAddMillis = minutesToAdd * 60 * 1000L
         val currentTime = System.currentTimeMillis()
 
-        // 1. GET LATEST DATA FROM FIREBASE (The Source of Truth)
+        // 1. GENERATE HISTORY RECORD FIRST
+        val historyRef = dbRef.parent?.child("history")?.push()
+        val historyId = historyRef?.key ?: "" // Get the unique key (e.g., "-NXY123...")
+
+        // Save the history data immediately
+        val sdf = java.text.SimpleDateFormat("MMM dd, hh:mm a", java.util.Locale.getDefault())
+        val record = HistoryModel(
+            mobileId = device.name,
+            timeDuration = "$minutesToAdd Mins",
+            amount = calculatePrice(minutesToAdd),
+            timestamp = sdf.format(java.util.Date()),
+            hasFaceData = false, // Will become true after client uploads
+            hasLocationData = false
+        )
+        historyRef?.setValue(record)
+
+        // 2. CALCULATE TIME (Existing Logic)
         dbRef.child(device.deviceId).get().addOnSuccessListener { snapshot ->
             if (snapshot.exists()) {
-                // Get the real current values from DB
                 val currentStatus = snapshot.child("status").getValue(String::class.java) ?: "LOCKED"
                 val currentEndTime = snapshot.child("endTime").getValue(Long::class.java) ?: 0L
                 val currentSavedTime = snapshot.child("savedTime").getValue(Long::class.java) ?: 0L
 
                 var newEndTime: Long = 0
                 var newSavedTime: Long = 0
-                var newStatus = "ACTIVE"
 
-                // 2. DETERMINE LOGIC BASED ON STATUS
+                // CRITICAL CHANGE: Status becomes "UNLOCKING" to trigger camera
+                var newStatus = "UNLOCKING"
+
                 if (currentStatus == "ACTIVE" && currentEndTime > currentTime) {
-                    // SCENARIO A: Device is running -> EXTEND the time
                     newEndTime = currentEndTime + timeToAddMillis
-                    newStatus = "ACTIVE"
-                    // Keep savedTime as 0
+                    newStatus = "ACTIVE" // Already active, no need to photo again
                 }
                 else if (currentStatus == "PAUSED") {
-                    // SCENARIO B: Device is Paused -> Add to the "Frozen" time
-                    // We don't unlock it yet, we just give them more credit.
                     newSavedTime = currentSavedTime + timeToAddMillis
                     newStatus = "PAUSED"
-                    // endTime stays 0
                 }
                 else {
-                    // SCENARIO C: Device is Locked or Expired -> Start FRESH
+                    // Locked or Expired -> Trigger Camera
                     newEndTime = currentTime + timeToAddMillis
-                    newStatus = "ACTIVE"
+                    newStatus = "UNLOCKING"
                 }
 
-                // 3. PREPARE UPDATES
+                // 3. SEND COMMAND TO CLIENT
                 val updates = mapOf(
                     "status" to newStatus,
                     "endTime" to newEndTime,
-                    "savedTime" to newSavedTime
+                    "savedTime" to newSavedTime,
+                    "currentSessionId" to historyId // Pass the ticket!
                 )
 
-                // 4. WRITE TO DB
                 dbRef.child(device.deviceId).updateChildren(updates)
                     .addOnSuccessListener {
                         Toast.makeText(this, "Added $minutesToAdd mins", Toast.LENGTH_SHORT).show()
-
-                        // Only save history if we actually added time
-                        saveHistoryRecord(device, minutesToAdd)
                     }
             }
-        }.addOnFailureListener {
-            Toast.makeText(this, "Failed to connect to DB", Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun saveHistoryRecord(device: DeviceModel, minutes: Int) {
-        // Create a readable date
-        val sdf = java.text.SimpleDateFormat("MMM dd, hh:mm a", java.util.Locale.getDefault())
-        val dateString = sdf.format(java.util.Date())
-
-        // Create the record object
-        val record = HistoryModel(
-            mobileId = device.name,       // Or device.deviceId if you prefer
-            timeDuration = "$minutes Mins",
-            amount = calculatePrice(minutes),
-            timestamp = dateString,
-            hasFaceData = false, // Placeholder
-            hasLocationData = false // Placeholder
-        )
-
-        // Save to a NEW node called "history"
-        // dbRef points to "devices", so we go .parent to go back to root, then "history"
-        dbRef.parent?.child("history")?.push()?.setValue(record)
     }
 
     private fun calculatePrice(minutes: Int): String {

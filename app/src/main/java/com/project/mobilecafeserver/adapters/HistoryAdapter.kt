@@ -10,8 +10,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.project.mobilecafeserver.R
 import com.project.mobilecafeserver.models.HistoryModel
 
-class HistoryAdapter(private val historyList: List<HistoryModel>) :
-    RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
+class HistoryAdapter(
+    private val historyList: List<HistoryModel>,
+    private val onFaceClick: (String) -> Unit
+) : RecyclerView.Adapter<HistoryAdapter.HistoryViewHolder>() {
 
     class HistoryViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvMid: TextView = itemView.findViewById(R.id.tvMid)
@@ -35,11 +37,17 @@ class HistoryAdapter(private val historyList: List<HistoryModel>) :
 
         // --- FACE ICON LOGIC ---
         if (record.hasFaceData) {
-            holder.ivFace.setColorFilter(Color.parseColor("#4CAF50")) // Green (Active)
+            holder.ivFace.setColorFilter(Color.parseColor("#4CAF50")) // Green
             holder.ivFace.alpha = 1.0f
+
+            // Enable Click
+            holder.ivFace.setOnClickListener {
+                onFaceClick(record.id) // Pass the ID back to the Activity
+            }
         } else {
-            holder.ivFace.setColorFilter(Color.LTGRAY) // Gray (No Data)
+            holder.ivFace.setColorFilter(Color.LTGRAY) // Gray
             holder.ivFace.alpha = 0.3f
+            holder.ivFace.setOnClickListener(null) // Disable Click
         }
 
         // --- LOCATION ICON LOGIC ---

@@ -1,6 +1,7 @@
 package com.project.mobilecafeserver.models
 
 data class HistoryModel(
+    var id: String = "", // <--- ADD THIS (to store the record ID like "-Nx123...")
     val mobileId: String = "",
     val timeDuration: String = "", // e.g. "1 Hr"
     val amount: String = "",       // e.g. "20.00"

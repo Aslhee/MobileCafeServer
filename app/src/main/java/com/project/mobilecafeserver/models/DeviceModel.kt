@@ -14,6 +14,9 @@ data class DeviceModel(
     var savedTime: Long = 0,// <--- ADD THIS NEW FIELD (Time remaining in ms)
     var batteryLevel: Int = 0, // <--- ADD THIS NEW FIELD (Default 0)
 
+    // [NEW] The Ticket for the photo
+    var currentSessionId: String = "",
+
     // This exists only in the app memory, NOT in Firebase
     @get:Exclude
     var isSelected: Boolean = false
